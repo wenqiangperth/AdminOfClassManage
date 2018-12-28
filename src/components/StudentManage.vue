@@ -1,6 +1,25 @@
 <template>
-  <div class="right">
-    <div v-show="studentPage">
+  <div>
+    <div>
+      <div class="header">
+        <p class="title">翻转课堂管理平台</p>
+      </div>
+      <div class="left">
+        <el-menu @select="handSelect" default-active="1-2">
+          <el-submenu index="1">
+            <template slot="title">
+              <i class="iconfont icon-wenjian2"></i>
+              <span>信息管理</span>
+            </template>
+            <el-menu-item-group>
+              <el-menu-item index="1-1">教师信息管理</el-menu-item>
+              <el-menu-item index="1-2">学生信息管理</el-menu-item>
+            </el-menu-item-group>
+          </el-submenu>
+        </el-menu>
+      </div>
+    </div>
+    <div class="right" v-show="studentPage">
       <el-button type="text" class="right-title">学生信息管理</el-button>
       <div class="search">
         <el-input class="search-input" placeholder="输入学号/姓名" v-model="student">
@@ -116,6 +135,17 @@
         })*/
     },
     methods:{
+      handSelect(index,indexpath){
+        if(index=="1-1") {
+          this.$router.push({path: '/teacher'});
+        }
+        else {
+          this.$router.push({path: '/student'});
+        }
+      },
+      changeFixed(clientHeight){
+        this.$refs.homePage.style.height=clientHeight+'px';
+      },
       searchTeacher(){
         let that=this;
         let j=0;
@@ -148,9 +178,9 @@
         }).then(({ value }) => {
           let that=this;
           that.$message({
-                  type: 'success',
-                  message: ' 您已修改该账户密码为： ' + value
-                })
+            type: 'success',
+            message: ' 您已修改该账户密码为： ' + value
+          })
           /*
           that.$axios({
             method: 'put',
@@ -237,6 +267,29 @@
 </script>
 
 <style scoped>
+  .header{
+    min-width: 1020px;
+    width: 100%;
+    height: 70px;
+    background-color: grey;
+    opacity: 0.3;
+    padding-bottom: 20px;
+  }
+  .title{
+    width: 100%;
+    font-family: 楷体;
+    font-size: 50px;
+    text-align: left;
+    color: aqua;
+    margin-top: 0px;
+  }
+
+  .left{
+    width:200px;
+    float:left;
+    height: 500px;
+  }
+
   .right{
     min-width: 800px;
     margin-left: 220px;
