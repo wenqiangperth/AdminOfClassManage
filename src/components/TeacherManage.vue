@@ -99,11 +99,7 @@
         teachers:[],
         tableData:[
           {
-            account:24320162202920,
-            name:"张三",
-            gender:"男",
-            phone:"13950064936",
-            email:"212454584@163.com"
+
           }
         ]
       };
@@ -111,17 +107,42 @@
     created(){
       let that=this
       that.$axios({
-        method: 'get',
-        url: '/admin/teachers',
+        method: 'GET',
+        url: '/teacher',
+        params:{
+          pageNum:that.currentPage,
+          pageSize:that.pageSize
+        },
+        headers:{
+          'Authorization':window.localStorage['token']
+        }
       })
         .then(function (response) {
-          that.teachers=response.data;
-          that.total=that.teachers.length;
-          that.tableData=that.teachers.slice((that.currentPage-1)*that.pageSize,that.currentPage*that.pageSize);
+          console.log(response);
+          that.tableData=response.data;
+          //that.tableData=that.teachers.slice((that.currentPage-1)*that.pageSize,that.currentPage*that.pageSize);
         })
         .catch(function (error) {
           console.log(error)
         })
+
+      that.$axios({
+        method: 'GET',
+        url: '/teacher/number',
+        headers:{
+          'Authorization':window.localStorage['token']
+        }
+      })
+        .then(function (response) {
+          if(response.status===200) {
+            console.log("perth"+response.data);
+            that.total = response.data;
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+
     },
     methods:{
       handSelect(index,indexpath){
@@ -136,26 +157,68 @@
         this.$refs.homePage.style.height=clientHeight+'px';
       },
       searchTeacher(){
-        let that=this;
-        let j=0;
-        that.tableData=[];
-        for(let i in that.teachers){
-          if(that.teachers[i].account===that.teacher||that.teachers[i].name===that.teacher){
-            that.tableData[j++]=that.teachers[i];
-          }
-        }
-        if(that.teacher===''){
-          that.tableData=that.teachers.slice((that.currentPage-1)*that.pageSize,that.currentPage*that.pageSize);
-        }
+        // let that=this;
+        // let j=0;
+        // that.tableData=[];
+        // for(let i in that.teachers){
+        //   if(that.teachers[i].account===that.teacher||that.teachers[i].name===that.teacher){
+        //     that.tableData[j++]=that.teachers[i];
+        //   }
+        // }
+        // if(that.teacher===''){
+        //   that.tableData=that.teachers.slice((that.currentPage-1)*that.pageSize,that.currentPage*that.pageSize);
+        // }
       },
       handleSizeChange(val) {
-        this.pageSize=val;
-        this.currentPage=1;
-        this.tableData=this.teachers.slice((this.currentPage-1)*this.pageSize,this.currentPage*this.pageSize);
+        let that=this;
+        that.pageSize=val;
+        console.log(that.total+"aaaa")
+        that.$axios({
+          method: 'GET',
+          url: '/teacher',
+          params:{
+            pageNum:that.currentPage,
+            pageSize:that.pageSize
+          },
+          headers:{
+            'Authorization':window.localStorage['token']
+          }
+        })
+          .then(function (response) {
+            console.log(response);
+            that.tableData=response.data;
+            //that.total=that.tableData.length;
+            //that.tableData=that.teachers.slice((that.currentPage-1)*that.pageSize,that.currentPage*that.pageSize);
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
       },
       handleCurrentChange(val) {
+        let that=this;
         this.currentPage=val;
-        this.tableData=this.teachers.slice((this.currentPage-1)*this.pageSize,this.currentPage*this.pageSize);
+        this.$axios({
+          method: 'GET',
+          url: '/teacher',
+          params:{
+            pageNum:that.currentPage,
+            pageSize:that.pageSize
+          },
+          headers:{
+            'Authorization':window.localStorage['token']
+          }
+        })
+          .then(function (response) {
+            console.log(response);
+            that.tableData=response.data;
+           // that.total=that.tableData.length;
+            // that.total=that.teachers.length;
+            //that.tableData=that.teachers.slice((that.currentPage-1)*that.pageSize,that.currentPage*that.pageSize);
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+        //this.tableData=this.teachers.slice((this.currentPage-1)*this.pageSize,this.currentPage*this.pageSize);
       },
       handleEdit(index,row){
         this.$router.push({path: '/changeTeacher',query:{name:row.name,account:row.account,email:row.email}});

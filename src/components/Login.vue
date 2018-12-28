@@ -83,16 +83,31 @@
           alert('用户名或密码不能为空！');
         }
         else {
+          console.log(this.form.username);
+          console.log(this.form.password);
           that.$axios({
-            method: 'post',
-            url: '/admin/login',
+            method: 'POST',
+            url: '/user/login',
             data: {
-              accountNumber: this.form.username,
+              username: this.form.username,
               password: this.form.password
+            },
+            transformRequest: [function (data) {
+              let ret = '';
+              for (let it in data) {
+                ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
+              }
+              console.log(ret);
+              return ret
+            }],
+            headers:{
+              'Content-Type': 'application/x-www-form-urlencoded'
             }
           })
-            .then(function (response) {
-              if (response.data === "登陆成功") {
+            .then(response=> {
+              console.log(response);
+              if (response.data === "{role=ROLE_ADMIN, isActive=0}") {
+                window.localStorage['token']=response.headers.authorization;
                 that.manage=true;
                 that.$router.push({path: '/teacher'});
               } else alert(response.data);
