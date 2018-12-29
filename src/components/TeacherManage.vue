@@ -50,19 +50,19 @@
             width="160">
           </el-table-column>
           <el-table-column
-            prop="name"
+            prop="teacherName"
             label="姓名"
-            width="100">
+            width="150">
           </el-table-column>
-          <el-table-column
-            prop="gender"
-            label="性别"
-            width="100">
-          </el-table-column>
-          <el-table-column
-            prop="phone"
-            label="手机号">
-          </el-table-column>
+          <!--<el-table-column-->
+            <!--prop="gender"-->
+            <!--label="性别"-->
+            <!--width="100">-->
+          <!--</el-table-column>-->
+          <!--<el-table-column-->
+            <!--prop="phone"-->
+            <!--label="手机号">-->
+          <!--</el-table-column>-->
           <el-table-column
             prop="email"
             label="电子邮箱">

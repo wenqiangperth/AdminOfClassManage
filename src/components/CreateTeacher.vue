@@ -72,21 +72,29 @@
       addTeacher(){
         let that=this;
         that.$axios({
-          method: 'post',
+          method: 'POST',
           url: '/admin/teacher',
+          headers:{
+            'Authorization':window.localStorage['token']
+          },
           data: {
-            accountNumber: that.teacher.account,
-            name:that.teacher.name,
+            account: that.teacher.account,
+            teacherName:that.teacher.name,
             email:that.teacher.email,
             password: that.teacher.password
           }
         })
           .then(function (response) {
-            if (response.data === "插入成功") {
+            console.log(response);
+            if (response.status === 200) {
+              window.localStorage['token']=response.headers.authorization;
               that.$message({
                 message: '您已成功创建该账户',
                 type: 'success'
               });
+              this.$router.push({
+                path:'/teacher'
+              })
             } else {
               that.$message.error('创建失败！');
             }
