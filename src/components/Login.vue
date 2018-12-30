@@ -87,7 +87,7 @@
           console.log(this.form.password);
           that.$axios({
             method: 'POST',
-            url: '/user/login',
+            url: '/admin/login',
             data: {
               username: this.form.username,
               password: this.form.password

@@ -156,7 +156,7 @@
     border-radius: 4px;
   }
   .teacher-item{
-    margin-top: 20px;
+    margin-top: 0px;
     height: 50px;
     width: 300px;
     margin-left: 35px;
