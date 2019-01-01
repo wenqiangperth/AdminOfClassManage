@@ -118,9 +118,8 @@
         }
       })
         .then(function (response) {
-          console.log(response);
+          window.localStorage['token']=response.headers.authorization;
           that.tableData=response.data;
-          //that.tableData=that.teachers.slice((that.currentPage-1)*that.pageSize,that.currentPage*that.pageSize);
         })
         .catch(function (error) {
           console.log(error)
@@ -135,7 +134,7 @@
       })
         .then(function (response) {
           if(response.status===200) {
-            console.log("perth"+response.data);
+            window.localStorage['token']=response.headers.authorization;
             that.total = response.data;
           }
         })
@@ -157,22 +156,33 @@
         this.$refs.homePage.style.height=clientHeight+'px';
       },
       searchTeacher(){
-        // let that=this;
-        // let j=0;
-        // that.tableData=[];
-        // for(let i in that.teachers){
-        //   if(that.teachers[i].account===that.teacher||that.teachers[i].name===that.teacher){
-        //     that.tableData[j++]=that.teachers[i];
-        //   }
-        // }
-        // if(that.teacher===''){
-        //   that.tableData=that.teachers.slice((that.currentPage-1)*that.pageSize,that.currentPage*that.pageSize);
-        // }
+        let that=this;
+        that.$axios({
+          method: 'GET',
+          url: '/teacher/searchteacher',
+          params:{
+            accountOrName:that.teacher
+          },
+          headers:{
+            'Authorization':window.localStorage['token']
+          }
+        })
+          .then(function (response) {
+            if(response.status===200) {
+              console.log("perth"+response.data);
+              window.localStorage['token']=response.headers.authorization;
+              that.tableData=response.data;
+              console.log(that.total);
+            }
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+
       },
       handleSizeChange(val) {
         let that=this;
         that.pageSize=val;
-        console.log(that.total+"aaaa")
         that.$axios({
           method: 'GET',
           url: '/teacher',
@@ -185,8 +195,9 @@
           }
         })
           .then(function (response) {
-            console.log(response);
-            that.tableData=response.data;
+            if(response.status===200) {
+              that.tableData = response.data;
+            }
             //that.total=that.tableData.length;
             //that.tableData=that.teachers.slice((that.currentPage-1)*that.pageSize,that.currentPage*that.pageSize);
           })
@@ -209,8 +220,10 @@
           }
         })
           .then(function (response) {
-            console.log(response);
-            that.tableData=response.data;
+            if(response.status===200) {
+              window.localStorage['token'] = response.headers.authorization;
+              that.tableData = response.data;
+            }
            // that.total=that.tableData.length;
             // that.total=that.teachers.length;
             //that.tableData=that.teachers.slice((that.currentPage-1)*that.pageSize,that.currentPage*that.pageSize);
@@ -221,7 +234,7 @@
         //this.tableData=this.teachers.slice((this.currentPage-1)*this.pageSize,this.currentPage*this.pageSize);
       },
       handleEdit(index,row){
-        this.$router.push({path: '/changeTeacher',query:{name:row.name,account:row.account,email:row.email}});
+        this.$router.push({path: '/changeTeacher',query:{id:row.id,name:row.teacherName,account:row.account,email:row.email}});
       },
       handleReset(index,row){
         this.$prompt('请输入新密码', '修改密码', {
@@ -231,14 +244,17 @@
           let that=this;
           that.$axios({
             method: 'put',
-            url: '/admin/teacher/password',
+            url: '/teacher/'+row.id+'/password',
             data:{
-              accountNumber:row.account,
               password:value
+            },
+            headers:{
+              'Authorization':window.localStorage['token']
             }
           })
             .then(function (response) {
-              if(response.data==="更改成功"){
+              if(response.status===200){
+                window.localStorage['token']=response.headers.authorization;
                 that.$message({
                   type: 'success',
                   message: ' 您已修改该账户密码为： ' + value
@@ -262,22 +278,23 @@
       },
       handleDelete(index,row){
         let that=this;
-        that.$confirm('此操作将永久删除该文件, 是否继续?', '删除账户', {
+        that.$confirm('此操作将永久删除该用户, 是否继续?', '删除账户', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
           that.$axios({
             method: 'delete',
-            url: '/admin/teacher',
-            params:{
-              accountNumber: row.account
+            url: '/teacher/'+row.id,
+            headers:{
+              'Authorization':window.localStorage['token']
             }
           })
             .then(function (response) {
-              if(response.data==="删除成功"){
-                that.teachers.splice((that.currentPage-1)*that.pageSize+index,1);
-                that.tableData=that.teachers.slice((that.currentPage-1)*that.pageSize,that.currentPage*that.pageSize);
+              if(response.status===200){
+                window.localStorage['token']=response.headers.authorization;
+                that.tableData.splice(index,1);
+                that.total=that.total-1;
                 that.$message({
                   type: 'success',
                   message: ' 您已成功删除该账户 '

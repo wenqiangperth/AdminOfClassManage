@@ -29,7 +29,7 @@
                        @size-change="handleSizeChange"
                        @current-change="handleCurrentChange"
                        :current-page.sync="currentPage"
-                       :page-sizes="[1, 2, 3, 4]"
+                       :page-sizes="[10, 20, 30, 40]"
                        :page-size="pageSize"
                        layout="sizes, prev, pager, next"
                        :total="total ">
@@ -47,22 +47,14 @@
           <el-table-column
             prop="account"
             label="学号"
-            width="160">
+            width="200">
           </el-table-column>
           <el-table-column
-            prop="name"
+            prop="studentName"
             label="姓名"
-            width="100">
+            width="200">
           </el-table-column>
-          <el-table-column
-            prop="gender"
-            label="性别"
-            width="100">
-          </el-table-column>
-          <el-table-column
-            prop="phone"
-            label="手机号">
-          </el-table-column>
+
           <el-table-column
             prop="email"
             label="电子邮箱">
@@ -94,7 +86,7 @@
         studentPage:true,
         student:'',
         currentPage:1,
-        pageSize:2,
+        pageSize:10,
         total:100,
         students:[
           {
@@ -117,8 +109,47 @@
     },
     created(){
       let that=this;
-      that.total=that.students.length;
-      that.tableData=that.students.slice((that.currentPage-1)*that.pageSize,that.currentPage*that.pageSize);
+
+      that.$axios({
+        method: 'GET',
+        url: '/student/number',
+        headers:{
+          'Authorization':window.localStorage['token']
+        }
+      })
+        .then(function (response) {
+          if(response.status===200) {
+            window.localStorage['token']=response.headers.authorization;
+            console.log("perth"+response.data);
+            that.total = response.data;
+          }
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+
+      that.$axios({
+        method: 'GET',
+        url: '/student',
+        params:{
+          pageNum:that.currentPage,
+          pageSize:that.pageSize
+        },
+        headers:{
+          'Authorization':window.localStorage['token']
+        }
+      })
+        .then(function (response) {
+          if(response.status===200){
+            window.localStorage['token']=response.headers.authorization;
+            that.tableData=response.data;
+          }
+
+        })
+        .catch(function (error) {
+          console.log(error)
+        })
+
       /*
       let that=this
       that.$axios({
@@ -148,6 +179,28 @@
       },
       searchTeacher(){
         let that=this;
+        that.$axios({
+          method: 'GET',
+          url: '/student/searchstudent',
+          params:{
+            accountOrName:that.student
+          },
+          headers:{
+            'Authorization':window.localStorage['token']
+          }
+        })
+          .then(function (response) {
+            if(response.status===200) {
+              console.log("perth"+response.data);
+              window.localStorage['token']=response.headers.authorization;
+              that.tableData=response.data;
+              console.log(that.total);
+            }
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+
         let j=0;
         that.tableData=[];
         for(let i in that.students){
@@ -160,16 +213,59 @@
         }
       },
       handleSizeChange(val) {
+        let that=this;
         this.pageSize=val;
-        this.currentPage=1;
-        this.tableData=this.students.slice((this.currentPage-1)*this.pageSize,this.currentPage*this.pageSize);
+        that.pageSize=val;
+        that.$axios({
+          method: 'GET',
+          url: '/student',
+          params:{
+            pageNum:that.currentPage,
+            pageSize:that.pageSize
+          },
+          headers:{
+            'Authorization':window.localStorage['token']
+          }
+        })
+          .then(function (response) {
+            if(response.status===200) {
+              window.localStorage['token']=response.headers.authorization;
+              that.tableData = response.data;
+            }
+
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
+
+
       },
       handleCurrentChange(val) {
+        let that=this;
         this.currentPage=val;
-        this.tableData=this.students.slice((this.currentPage-1)*this.pageSize,this.currentPage*this.pageSize);
+        this.$axios({
+          method: 'GET',
+          url: '/student',
+          params:{
+            pageNum:that.currentPage,
+            pageSize:that.pageSize
+          },
+          headers:{
+            'Authorization':window.localStorage['token']
+          }
+        })
+          .then(function (response) {
+            if(response.status===200) {
+              window.localStorage['token']=response.headers.authorization;
+              that.tableData = response.data;
+            }
+          })
+          .catch(function (error) {
+            console.log(error)
+          })
       },
       handleEdit(index,row){
-        this.$router.push({path: '/changeStudent',query:{name:row.name,account:row.account,email:row.email}});
+        this.$router.push({path: '/changeStudent',query:{id:row.id,name:row.studentName,account:row.account,email:row.email}});
       },
       handleReset(index,row){
         this.$prompt('请输入新密码', '修改密码', {
@@ -177,21 +273,19 @@
           cancelButtonText: '取消'
         }).then(({ value }) => {
           let that=this;
-          that.$message({
-            type: 'success',
-            message: ' 您已修改该账户密码为： ' + value
-          })
-          /*
           that.$axios({
             method: 'put',
-            url: '/admin/teacher/password',
+            url: '/student/'+row.id+'/password',
             data:{
-              accountNumber:row.account,
               password:value
+            },
+            headers:{
+              'Authorization':window.localStorage['token']
             }
           })
             .then(function (response) {
-              if(response.data==="更改成功"){
+              if(response.status===200){
+                window.localStorage['token']=response.headers.authorization;
                 that.$message({
                   type: 'success',
                   message: ' 您已修改该账户密码为： ' + value
@@ -205,7 +299,7 @@
             })
             .catch(function (error) {
               console.log(error)
-            });*/
+            });
         }).catch(() => {
           this.$message({
             type: 'info',
@@ -220,24 +314,18 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          that.students.splice((that.currentPage-1)*that.pageSize+index,1);
-          that.tableData=that.students.slice((that.currentPage-1)*that.pageSize,that.currentPage*that.pageSize);
-          that.$message({
-            type: 'success',
-            message: ' 您已成功删除该账户 '
-          })
-          /*
           that.$axios({
             method: 'delete',
-            url: '/admin/teacher',
-            params:{
-              accountNumber: row.account
+            url: '/student/'+row.id,
+            headers:{
+              'Authorization':window.localStorage['token']
             }
           })
             .then(function (response) {
-              if(response.data==="删除成功"){
-                that.teachers.splice((that.currentPage-1)*that.pageSize+index,1);
-                that.tableData=that.teachers.slice((that.currentPage-1)*that.pageSize,that.currentPage*that.pageSize);
+              if(response.status===200){
+                window.localStorage['token']=response.headers.authorization;
+                that.tableData.splice(index,1);
+                that.total=that.total-1;
                 that.$message({
                   type: 'success',
                   message: ' 您已成功删除该账户 '
@@ -251,7 +339,8 @@
             })
             .catch(function (error) {
               console.log(error)
-            });*/
+            });
+
         }).catch(() => {
           that.$message({
             type: 'info',

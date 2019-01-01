@@ -56,7 +56,8 @@
         teacher:{
           name:'',
           account:'',
-          email:''
+          email:'',
+          id:''
         }
       }
     },
@@ -64,6 +65,7 @@
       this.teacher.name = this.$route.query.name;
       this.teacher.account = this.$route.query.account;
       this.teacher.email = this.$route.query.email;
+      this.teacher.id=this.$route.query.id;
       this.oldTeacher.name = this.$route.query.name;
       this.oldTeacher.account = this.$route.query.account;
       this.oldTeacher.email = this.$route.query.email;
@@ -89,24 +91,34 @@
         }
         else {
           let that=this;
+          console.log('lalal'+that.teacher.id)
           that.$axios({
             method: 'put',
-            url: '/admin/teacher',
+            url: '/teacher/'+that.teacher.id+'/information',
             data: {
-              accountNumber: that.oldTeacher.account,
-              newAccountNumber:that.teacher.account,
-              name:that.teacher.name,
+              account: that.teacher.account,
+              teacherName:that.teacher.name,
               email:that.teacher.email
+            },
+            headers:{
+              'Authorization':window.localStorage['token']
             }
           })
             .then(function (response) {
-              if (response.data === "更改成功") {
+              if(response.status===200){
+                window.localStorage['token']=response.headers.authorization;
                 that.$message({
                   message: '您的修改已完成！',
                   type: 'success'
                 });
-              } else {
-                this.$message.error('修改失败！');
+                setTimeout(function () {
+                  that.$router.push({
+                    path:'/teacher'
+                  })
+                },2000)
+              }
+              else {
+                that.$message.error('修改失败！');
               }
             })
             .catch(function (error) {

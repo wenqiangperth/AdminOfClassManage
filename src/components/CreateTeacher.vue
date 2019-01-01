@@ -92,9 +92,12 @@
                 message: '您已成功创建该账户',
                 type: 'success'
               });
-              this.$router.push({
-                path:'/teacher'
-              })
+              setTimeout(function () {
+                that.$router.push({
+                  path:'/teacher'
+                })
+              },1500)
+
             } else {
               that.$message.error('创建失败！');
             }

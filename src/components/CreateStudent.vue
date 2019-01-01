@@ -71,34 +71,40 @@
       },
       addStudent(){
         let that=this;
-        that.$message({
-          message: '您已成功创建该账户',
-          type: 'success'
-        });
-        /*
         that.$axios({
-          method: 'post',
-          url: '/admin/teacher',
+          method: 'POST',
+          url: '/admin/student',
+          headers:{
+            'Authorization':window.localStorage['token']
+          },
           data: {
-            accountNumber: that.teacher.account,
-            name:that.teacher.name,
-            email:that.teacher.email,
-            password: that.teacher.password
+            account: that.student.account,
+            studentName:that.student.name,
+            email:that.student.email,
+            password: that.student.password
           }
         })
           .then(function (response) {
-            if (response.data === "插入成功") {
+            console.log(response);
+            if (response.status === 200) {
+              window.localStorage['token']=response.headers.authorization;
               that.$message({
                 message: '您已成功创建该账户',
                 type: 'success'
               });
+              setTimeout(function () {
+                that.$router.push({
+                  path:'/student'
+                })
+              },2000)
+
             } else {
               that.$message.error('创建失败！');
             }
           })
           .catch(function (error) {
             console.log(error)
-          })*/
+          })
       },
       cancel(){
         this.$router.push({path: '/student'});

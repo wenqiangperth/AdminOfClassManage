@@ -55,6 +55,7 @@
           email:''
         },
         student:{
+          id:'',
           name:'',
           account:'',
           email:''
@@ -62,6 +63,7 @@
       }
     },
     created() {
+      this.student.id=this.$route.query.id;
       this.student.name = this.$route.query.name;
       this.student.account = this.$route.query.account;
       this.student.email = this.$route.query.email;
@@ -90,34 +92,40 @@
         }
         else {
           let that=this;
-          that.$message({
-            message: '您的修改已完成！',
-            type: 'success'
-          });
-          /*
+          console.log('lalal'+that.student.id)
           that.$axios({
             method: 'put',
-            url: '/admin/teacher',
+            url: '/student/'+that.student.id+'/information',
             data: {
-              accountNumber: that.oldTeacher.account,
-              newAccountNumber:that.teacher.account,
-              name:that.teacher.name,
-              email:that.teacher.email
+              account: that.student.account,
+              studentName:that.student.name,
+              email:that.student.email
+            },
+            headers:{
+              'Authorization':window.localStorage['token']
             }
           })
             .then(function (response) {
-              if (response.data === "更改成功") {
+              if(response.status===200){
+                window.localStorage['token']=response.headers.authorization;
                 that.$message({
                   message: '您的修改已完成！',
                   type: 'success'
                 });
-              } else {
-                this.$message.error('修改失败！');
+                setTimeout(function () {
+                  that.$router.push({
+                    path:'/student'
+                  })
+                },1500)
+              }
+              else {
+                that.$message.error('修改失败！');
               }
             })
             .catch(function (error) {
               console.log(error)
-            })*/
+            })
+
         }
       },
       cancel(){
